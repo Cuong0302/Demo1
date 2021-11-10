@@ -1,0 +1,138 @@
+<html>
+<head>
+<title>MainActivity.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6a8759;}
+.s3 { color: #6897bb;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+MainActivity.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">com.example.demo</span><span class="s0">;</span>
+
+<span class="s0">import  </span><span class="s1">androidx.activity.result.ActivityResult</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">androidx.activity.result.ActivityResultCallback</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">androidx.activity.result.ActivityResultLauncher</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">androidx.activity.result.contract.ActivityResultContracts</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">androidx.annotation.NonNull</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">androidx.appcompat.app.AppCompatActivity</span><span class="s0">;</span>
+
+<span class="s0">import </span><span class="s1">android.content.Intent</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.database.Cursor</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.os.Bundle</span><span class="s0">;;</span>
+<span class="s0">import </span><span class="s1">android.view.Menu</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.view.MenuItem</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.view.View</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.widget.Button</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.widget.ListView</span><span class="s0">;</span>
+<span class="s0">import </span><span class="s1">android.widget.Toast</span><span class="s0">;</span>
+
+<span class="s0">import </span><span class="s1">java.util.ArrayList</span><span class="s0">;</span>
+
+
+<span class="s0">public class </span><span class="s1">MainActivity </span><span class="s0">extends </span><span class="s1">AppCompatActivity {</span>
+
+    <span class="s1">ArrayList&lt;mActivity&gt; arrayList</span><span class="s0">;</span>
+    <span class="s1">ListView listView</span><span class="s0">;</span>
+    <span class="s1">Button btnAdd</span><span class="s0">;</span>
+    <span class="s1">mActivityAdapter adapter</span><span class="s0">;</span>
+    <span class="s1">String tittle</span><span class="s0">,</span><span class="s1">text</span><span class="s0">;</span>
+    <span class="s1">Database database</span><span class="s0">;</span>
+
+    <span class="s0">private final </span><span class="s1">ActivityResultLauncher&lt;Intent&gt; activityResultLauncher = registerForActivityResult(</span>
+            <span class="s0">new </span><span class="s1">ActivityResultContracts.StartActivityForResult()</span><span class="s0">,</span>
+            <span class="s0">new </span><span class="s1">ActivityResultCallback&lt;ActivityResult&gt;() {</span>
+        <span class="s1">@Override</span>
+        <span class="s0">public void </span><span class="s1">onActivityResult(ActivityResult result) {</span>
+            <span class="s0">if</span><span class="s1">(result.getResultCode() == RESULT_OK){</span>
+                <span class="s1">Intent intent = result.getData()</span><span class="s0">;</span>
+                <span class="s1">tittle  = intent.getStringExtra(</span><span class="s2">&quot;Tittle&quot;</span><span class="s1">)</span><span class="s0">;</span>
+                <span class="s1">text  = intent.getStringExtra(</span><span class="s2">&quot;Text&quot;</span><span class="s1">)</span><span class="s0">;</span>
+                <span class="s0">if</span><span class="s1">(tittle.equals(</span><span class="s2">&quot;&quot;</span><span class="s1">) &amp;&amp; text.equals(</span><span class="s2">&quot;&quot;</span><span class="s1">)){</span>
+                    <span class="s1">Toast.makeText(MainActivity.</span><span class="s0">this, </span><span class="s2">&quot;Vui long nhap lai&quot;</span><span class="s0">, </span><span class="s1">Toast.LENGTH_SHORT).show()</span><span class="s0">;</span>
+                <span class="s1">}</span><span class="s0">else </span><span class="s1">{</span>
+                    <span class="s1">insertDabase()</span><span class="s0">;</span>
+                    <span class="s1">Toast.makeText(MainActivity.</span><span class="s0">this,</span><span class="s2">&quot;Đã thêm thành công!&quot;</span><span class="s0">,</span><span class="s1">Toast.LENGTH_SHORT).show()</span><span class="s0">;</span>
+                    <span class="s1">getDatabase()</span><span class="s0">;</span>
+                <span class="s1">}</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+    <span class="s1">})</span><span class="s0">;</span>
+    <span class="s1">@Override</span>
+    <span class="s0">protected void </span><span class="s1">onCreate(Bundle savedInstanceState) {</span>
+        <span class="s0">super</span><span class="s1">.onCreate(savedInstanceState)</span><span class="s0">;</span>
+        <span class="s1">setContentView(R.layout.activity_main)</span><span class="s0">;</span>
+
+        <span class="s1">getViews()</span><span class="s0">;</span>
+        <span class="s1">mSetAdapter()</span><span class="s0">;</span>
+        <span class="s1">initDatabase()</span><span class="s0">;</span>
+        <span class="s1">buttonClickAdd()</span><span class="s0">;</span>
+        <span class="s1">getDatabase()</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s0">private void </span><span class="s1">insertDabase() {</span>
+        <span class="s1">database.QuerryData(</span><span class="s2">&quot;INSERT INTO CongViec VALUES(null, '&quot;</span><span class="s1">+ tittle +</span><span class="s2">&quot;', '&quot;</span><span class="s1">+ text +</span><span class="s2">&quot;')&quot;</span><span class="s1">)</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s0">private void </span><span class="s1">getDatabase() {</span>
+        <span class="s1">Cursor dataCongViec = database.GetData(</span><span class="s2">&quot;SELECT * FROM CongViec&quot;</span><span class="s1">)</span><span class="s0">;</span>
+        <span class="s1">arrayList.clear()</span><span class="s0">;</span>
+        <span class="s0">while</span><span class="s1">(dataCongViec.moveToNext()){</span>
+            <span class="s0">int </span><span class="s1">id = dataCongViec.getInt(</span><span class="s3">0</span><span class="s1">)</span><span class="s0">;</span>
+            <span class="s1">String tt = dataCongViec.getString(</span><span class="s3">1</span><span class="s1">)</span><span class="s0">;</span>
+            <span class="s1">String txt = dataCongViec.getString(</span><span class="s3">2</span><span class="s1">)</span><span class="s0">;</span>
+            <span class="s1">arrayList.add(</span><span class="s0">new </span><span class="s1">mActivity(id</span><span class="s0">,</span><span class="s1">tt</span><span class="s0">,</span><span class="s1">txt))</span><span class="s0">;</span>
+        <span class="s1">}</span>
+        <span class="s1">adapter.notifyDataSetChanged()</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s0">private void </span><span class="s1">initDatabase() {</span>
+        <span class="s1">database = </span><span class="s0">new </span><span class="s1">Database(</span><span class="s0">this,</span><span class="s2">&quot;ghichu.sqlite&quot;</span><span class="s0">, null,</span><span class="s3">1</span><span class="s1">)</span><span class="s0">;</span>
+        <span class="s1">database.QuerryData(</span><span class="s2">&quot;CREATE TABLE IF NOT EXISTS CongViec(Id INTEGER PRIMARY KEY AUTOINCREMENT, tieuDeCV VARCHAR(200), tenCV VARCHAR)&quot;</span><span class="s1">)</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s0">private void </span><span class="s1">mSetAdapter(){</span>
+        <span class="s1">adapter = </span><span class="s0">new </span><span class="s1">mActivityAdapter(MainActivity.</span><span class="s0">this, </span><span class="s1">R.layout.activity_list</span><span class="s0">, </span><span class="s1">arrayList)</span><span class="s0">;</span>
+        <span class="s1">listView.setAdapter(adapter)</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s0">private void </span><span class="s1">buttonClickAdd(){</span>
+        <span class="s1">btnAdd.setOnClickListener(</span><span class="s0">new </span><span class="s1">View.OnClickListener() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">onClick(View v) {</span>
+                <span class="s1">Intent intent = </span><span class="s0">new </span><span class="s1">Intent(MainActivity.</span><span class="s0">this, </span><span class="s1">AddActivity.</span><span class="s0">class</span><span class="s1">)</span><span class="s0">;</span>
+                <span class="s1">activityResultLauncher.launch(intent)</span><span class="s0">;</span>
+            <span class="s1">}</span>
+        <span class="s1">})</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s0">private void </span><span class="s1">getViews(){</span>
+        <span class="s1">listView = findViewById(R.id.listView)</span><span class="s0">;</span>
+        <span class="s1">btnAdd = findViewById(R.id.btnAdd)</span><span class="s0">;</span>
+        <span class="s1">arrayList = </span><span class="s0">new </span><span class="s1">ArrayList&lt;&gt;()</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s1">@Override</span>
+    <span class="s0">public boolean </span><span class="s1">onCreateOptionsMenu(Menu menu) {</span>
+        <span class="s1">getMenuInflater().inflate(R.menu.menu_demo</span><span class="s0">, </span><span class="s1">menu)</span><span class="s0">;</span>
+
+        <span class="s0">return super</span><span class="s1">.onCreateOptionsMenu(menu)</span><span class="s0">;</span>
+    <span class="s1">}</span>
+
+    <span class="s1">@Override</span>
+    <span class="s0">public boolean </span><span class="s1">onOptionsItemSelected(@NonNull MenuItem item) {</span>
+        <span class="s0">if</span><span class="s1">(item.getItemId() == R.id.menuSetting){</span>
+
+        <span class="s1">}</span>
+        <span class="s0">return super</span><span class="s1">.onOptionsItemSelected(item)</span><span class="s0">;</span>
+    <span class="s1">}</span>
+<span class="s1">}</span></pre>
+</body>
+</html>
